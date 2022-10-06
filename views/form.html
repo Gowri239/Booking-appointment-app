@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Book Appointment App</title>
+    <link rel="stylesheet" href="/css/stylesheet.css"> 
+  </head>
+  <body>
+    <header>
+      <h1>Book Appointment App</h1>
+    </header>
+
+    <section class="container">
+      <form id="my-form" onsubmit="userDetails(event)">
+        <h1>Add User</h1>
+        <div class="msg"></div>
+        <div>
+          <label for="name">Name:</label>
+          <input type="text" id="username" name="username">
+        </div>
+        <div>
+          <label for="email">Email:</label>
+          <input type="text" id="emailid" name="emailid">
+        </div>
+        <input class="btn" type="submit" value="Submit">
+      </form>
+    </section>
+    
+    <ul id="userList"></ul>
+    <script>
+      function userDetails(event){
+        event.preventDefault();
+        const name=event.target.username.value;
+        const email = event.target.emailid.value;
+        let myobj ={
+          name,
+          email
+        }
+      axios.post('http://localhost:3000/user/add-user',myobj)
+        .then((response) => {
+          showUserOnScreen(response.data.newUserDetail);
+            //console.log(response)
+       })
+       .catch((err) => {
+            console.log(err)
+       })
+   // localStorage.setItem(myobj.email,JSON.stringify(myobj));
+    //showNewUserOnScreen(myobj);
+      }
+
+      window.addEventListener("DOMContentLoaded",() => {
+        axios.get('http://localhost:3000/user/get-users')
+        .then((response) => {
+            console.log(response)
+            for(var i=0;i<response.data.allUsers.length;i++){
+                showUserOnScreen(response.data.allUsers[i])
+            }
+       })
+       .catch((err) => {
+           console.log(err)
+       })
+    // const localStorageObj = localStorage;
+    // const localStorageKeys = Object.keys(localStorageObj)
+    
+    // for(var i=0; i<localStorageKeys.length; i++){
+    //     const key = localStorageKeys[i]
+    //     const userDetailsString = localStorageObj[key];
+    //     const userDetailObj = JSON.parse(userDetailsString);
+    //     showNewUserOnScreen(userDetailObj)
+    // }
+  })
+
+      function showUserOnScreen(user){
+
+        // document.getElementById('username').value = '';
+        // document.getElementById('email').value = '';
+        // if(localStorage.getItem(user.email) != null){
+        //   removeUserFromScreen(user.email)
+        //}
+    
+      const parentNode = document.getElementById('userList');
+      const childHTML = `<li id=${user.id}> ${user.name} -- ${user.email}
+                             <button onclick=deleteUser('${user.id}')> Delete User </button>
+                             <button onclick=editUserDetails('${user.email}','${user.name},'${user.id}')>Edit User </button>                   
+                       </li>`
+      parentNode.innerHTML = parentNode.innerHTML + childHTML;
+
+    
+    }
+      function editUserDetails(emailid, name,userId){
+
+        document.getElementById('email').value = emailid;
+        document.getElementById('username').value = name;
+    
+        deleteUser(userId)
+    }
+
+// deleteUser('abc@gmail.com')
+
+      function deleteUser(userId){
+        userId = 100;
+        axios.delete(`http://localhost:3000/user/delete-user/${userId}`)
+        .then((response) => {
+            removeUserFromScreen(userId)
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    // localStorage.removeItem(emailid)
+    // removeUserFromScreen(emailid)
+      }
+
+      function removeUserFromScreen(userId){
+   
+        const parentNode = document.getElementById('userList');
+        const childNodeToBeDeleted = document.getElementById(userId);
+
+        parentNode.removeChild(childNodeToBeDeleted);
+      }
+
+    </script>
+  </body>
+</html>
